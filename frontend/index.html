@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-R · Cockpit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-brand">
+      <div class="app-logo">A</div>
+      <span class="app-brand-name">AI-R</span>
+      <span class="app-brand-sep">·</span>
+      <span class="app-brand-target">
+        <span id="brand-target-name">drone</span>
+        <span class="ip" id="brand-target-ip">sim://local</span>
+      </span>
+    </div>
+    <div class="app-actions">
+      <span id="live-pill" class="live-pill offline"><span class="dot"></span><span id="live-label">offline</span></span>
+      <a href="/launcher" class="btn-ghost">← Quitter</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="left-col">
+      <!-- Vue du drone -->
+      <div class="card video-card">
+        <div class="section-head">
+          <span class="section-title">Vue du drone — YOLO en direct</span>
+        </div>
+        <div class="video-stage" id="video-stage">
+          <img id="video" src="/video" alt="flux drone" />
+          <div id="obstacle-banner" class="obstacle-banner hidden">⚠ OBSTACLE DÉTECTÉ</div>
+        </div>
+        <div class="detections" id="detections">
+          <span class="muted">Aucune détection</span>
+        </div>
+      </div>
+
+      <!-- Carte top-down -->
+      <div class="card map-card">
+        <div class="section-head">
+          <span class="section-title">Carte — vue du dessus</span>
+        </div>
+        <canvas id="map" width="900" height="320"></canvas>
+
+        <div class="stats-strip">
+          <div class="stat-cell">
+            <div class="stat-label">X</div>
+            <div class="stat-value" id="stat-x">0.00<span class="stat-unit">m</span></div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Y</div>
+            <div class="stat-value" id="stat-y">0.00<span class="stat-unit">m</span></div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Z</div>
+            <div class="stat-value" id="stat-z">0.00<span class="stat-unit">m</span></div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">YAW</div>
+            <div class="stat-value" id="stat-yaw">000<span class="stat-unit">°</span></div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">BATT</div>
+            <div class="stat-value" id="stat-batt">100<span class="stat-unit">%</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <!-- ÉTAT -->
+      <div class="section">
+        <div class="section-head"><span class="section-title">État</span></div>
+        <div class="state-row"><span class="state-label">Position X</span><span class="state-value" id="row-x">0.00<span class="u">m</span></span></div>
+        <div class="state-row"><span class="state-label">Position Y</span><span class="state-value" id="row-y">0.00<span class="u">m</span></span></div>
+        <div class="state-row"><span class="state-label">Altitude Z</span><span class="state-value" id="row-z">0.00<span class="u">m</span></span></div>
+        <div class="state-row"><span class="state-label">Cap (yaw)</span><span class="state-value" id="row-yaw">000<span class="u">°</span></span></div>
+        <div class="state-row"><span class="state-label">Batterie</span><span class="state-value" id="row-batt">100<span class="u">%</span></span></div>
+        <div class="state-row"><span class="state-label">État</span><span class="state-value" id="row-state">au sol</span></div>
+      </div>
+
+      <!-- COMMANDE -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-title">Commande</span>
+          <button id="voice-toggle" class="voice-toggle" type="button">
+            <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="6" y="2" width="4" height="8" rx="2"/><path d="M3.5 8a4.5 4.5 0 0 0 9 0M8 12.5v2M5.5 14.5h5" stroke-linecap="round"/></svg>
+            <span id="voice-label">Vocal · off</span>
+          </button>
+        </div>
+        <div id="voice-listening" class="voice-listening hidden">🎙 J'écoute…</div>
+        <form id="cmd-form">
+          <div class="cmd-input-row">
+            <input id="cmd-input" autocomplete="off" placeholder="ex: décolle, avance de 3m, fais demi-tour…" />
+            <button type="submit" class="btn-send">Envoyer</button>
+          </div>
+          <div class="presets">
+            <button type="button" class="preset" data-cmd="décolle">décolle</button>
+            <button type="button" class="preset" data-cmd="monte de 2m">monte 2m</button>
+            <button type="button" class="preset" data-cmd="avance de 3m">avance 3m</button>
+            <button type="button" class="preset" data-cmd="fais demi-tour">demi-tour</button>
+            <button type="button" class="preset" data-cmd="tourne à droite 90°">droite 90°</button>
+            <button type="button" class="preset" data-cmd="atterris">atterris</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- HISTORIQUE -->
+      <div class="section">
+        <div class="section-head"><span class="section-title">Historique des ordres</span></div>
+        <ul id="history" class="history-list">
+          <li class="muted" style="padding:6px 0">Aucun ordre pour l'instant.</li>
+        </ul>
+      </div>
+
+      <!-- PLAN LLM -->
+      <div class="section">
+        <div class="section-head"><span class="section-title">Plan (LLM)</span></div>
+        <pre id="plan" class="plan-pre">—</pre>
+      </div>
+
+      <!-- LOGS -->
+      <div class="section">
+        <div class="section-head"><span class="section-title">Logs</span></div>
+        <ul id="logs"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
