@@ -1,4 +1,4 @@
-# 🤖 AI-R: Autonomous Intelligent Reconnaissance Drone
+# AI-R: Autonomous Intelligent Reconnaissance Drone
 
 A sophisticated autonomous drone control system powered by AI and computer vision. Control DJI Tello drones (or simulator) using natural language commands, with real-time YOLO object detection and LLM-based planning.
 
